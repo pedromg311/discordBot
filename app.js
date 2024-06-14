@@ -31,6 +31,7 @@ client.on('interactionCreate', async interaction => {
 
 client.login(process.env.DISCORD_TOKEN);
 
+//This server is just for testing
 app.listen(3000, () => {
   console.log("Express server is listening on port 3000")
 });
