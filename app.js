@@ -1,60 +1,36 @@
-import 'dotenv/config';
-import express from 'express';
-import {
-  InteractionType,
-  InteractionResponseType,
-  InteractionResponseFlags,
-  MessageComponentTypes,
-  ButtonStyleTypes,
-} from 'discord-interactions';
-import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
-import { getShuffledOptions, getResult } from './game.js';
+import { createServer } from "./server.js"
+import { Client, GatewayIntentBits } from "discord.js"
 
-// Create an express app
-const app = express();
-// Get port, or default to 3000
-const PORT = process.env.PORT || 3000;
-// Parse request body and verifies incoming requests using discord-interactions package
-app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
+const app = createServer(client);
 
-// Store for in-progress games. In production, you'd want to use a DB
-const activeGames = {};
+client.login(process.env.DISCORD_BOT_TOKEN)
 
-/**
- * Interactions endpoint URL where Discord will send HTTP requests
- */
-app.post('/interactions', async function (req, res) {
-  // Interaction type and data
-  const { type, id, data } = req.body;
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
 
-  /**
-   * Handle verification requests
-   */
-  if (type === InteractionType.PING) {
-    return res.send({ type: InteractionResponseType.PONG });
-  }
-
-  /**
-   * Handle slash command requests
-   * See https://discord.com/developers/docs/interactions/application-commands#slash-commands
-   */
-  if (type === InteractionType.APPLICATION_COMMAND) {
-    const { name } = data;
-
-    // "test" command
-    if (name === 'test') {
-      // Send a message into the channel where command was triggered from
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          // Fetches a random emoji to send from a helper function
-          content: 'hello world ' + getRandomEmoji(),
-        },
-      });
+  try {
+    if (interaction.commandName === 'get_users_in_vc') {
+	  const user = await interaction.member.fetch();
+      const channel = await user.voice.channel;
+	  let response = "Please join a voice channel before running this command";
+	  
+	  if(channel) {
+		const vc = client.channels.cache.get(channel.id);
+		const memberArray = vc.members.map(member => member.displayName);
+		response = memberArray.join('\n');
+	  }
+	  
+	  await interaction.reply(response);
+	  
     }
+  } catch(error) {
+	console.log(error);
   }
 });
 
-app.listen(PORT, () => {
-  console.log('Listening on port', PORT);
+client.login(process.env.DISCORD_TOKEN);
+
+app.listen(3000, () => {
+  console.log("Express server is listening on port 3000")
 });
