@@ -8,7 +8,20 @@ const GET_PEOPLE_IN_CALL_COMMAND = {
   type: 1,
 };
 
+const GET_PEOPLE_ON_CALL_WITH_ROLE = {
+  name: 'get_users_in_vc_with_role',
+  description: 'Get names of people in the call that have a specific role',
+   options: [
+    {
+      type: 3,
+      name: 'role',
+      description: 'Pick a role',
+      required: true,
+    },
+  ],
+  type: 1,
+};
 
-const ALL_COMMANDS = [GET_PEOPLE_IN_CALL_COMMAND];
+const ALL_COMMANDS = [GET_PEOPLE_IN_CALL_COMMAND, GET_PEOPLE_ON_CALL_WITH_ROLE];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
