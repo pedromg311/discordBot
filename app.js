@@ -1,7 +1,7 @@
-import { createServer } from "./serverObject.js"
+import { createServer } from "./server.js"
 import { Client, GatewayIntentBits } from "discord.js"
 import fetch from 'node-fetch'
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates] });
 const app = createServer(client);
 
 client.login(process.env.DISCORD_BOT_TOKEN)
@@ -34,7 +34,10 @@ client.on('interactionCreate', async (interaction, par) => {
 	    if(channel && role) {
 		    const vc = client.channels.cache.get(channel.id);
 		    const memberArray = vc.members
-          .filter(member => member.roles.cache.some(userRole =>  userRole.name.toLowerCase() === role.toLowerCase()))  
+          .filter(member => {
+            member.roles.cache.forEach(userRole =>  console.log(userRole.name.toLowerCase()));
+            return member.roles.cache.some(userRole =>  userRole.name.toLowerCase() === role.toLowerCase());
+          })  
           .map(member => member.displayName);
         
 		    response = memberArray.join('\n');

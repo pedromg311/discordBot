@@ -17,5 +17,9 @@ export const createServer = client => {
 	// Parse request body and verifies incoming requests using discord-interactions package
 	app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
 
+  app.get('/ping', async function (req, res) {
+    res.send("pong");
+  });
+           
 	return app;
 }
